@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LW 入社メンバーアンケート</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200;300;400&family=DM+Mono:wght@300;400&family=Shippori+Mincho:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #181614;
+    --ink-60: rgba(24,22,20,0.6);
+    --ink-30: rgba(24,22,20,0.3);
+    --ink-10: rgba(24,22,20,0.1);
+    --paper: #f5f1eb;
+    --paper-2: #ece7df;
+    --paper-3: #e2ddd5;
+    --rust: #b84a20;
+    --rust-soft: #d4693a;
+    --gold: #c8a96e;
+    --white: #ffffff;
+    --radius: 0px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Mono', 'Hiragino Kaku Gothic ProN', monospace;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── noise texture overlay ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999; opacity: 0.5;
+  }
+
+  /* ── header ── */
+  header {
+    width: 100%;
+    padding: 24px 48px 20px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    border-bottom: 1px solid var(--ink-10);
+    position: sticky; top: 0;
+    background: var(--paper);
+    z-index: 100;
+  }
+
+  .lw-wordmark {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    font-weight: 400;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+
+  .header-divider {
+    width: 1px; height: 16px;
+    background: var(--ink-30);
+  }
+
+  .header-sub {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--ink-60);
+    font-weight: 300;
+  }
+
+  .progress-wrap {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .progress-label {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--ink-30);
+    font-family: 'DM Mono', monospace;
+    min-width: 44px;
+    text-align: right;
+  }
+
+  .progress-bar {
+    width: 100px; height: 1px;
+    background: var(--ink-10);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    position: absolute; left: 0; top: 0;
+    height: 100%; width: 0%;
+    background: var(--rust);
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ── main ── */
+  main {
+    width: 100%;
+    max-width: 700px;
+    padding: 72px 48px 120px;
+    flex: 1;
+  }
+
+  /* ── screens ── */
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeUp 0.5s ease; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── welcome screen ── */
+  .welcome-kicker {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--rust);
+    margin-bottom: 40px;
+    font-family: 'DM Mono', monospace;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .welcome-kicker::before {
+    content: '';
+    display: inline-block;
+    width: 24px; height: 1px;
+    background: var(--rust);
+  }
+
+  .welcome-headline {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 36px;
+    font-weight: 300;
+    line-height: 1.65;
+    letter-spacing: 0.03em;
+    margin-bottom: 40px;
+    color: var(--ink);
+  }
+
+  .welcome-lead {
+    font-size: 13px;
+    line-height: 2.1;
+    color: var(--ink-60);
+    margin-bottom: 56px;
+    max-width: 500px;
+    font-family: 'DM Mono', 'Hiragino Kaku Gothic ProN', monospace;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+
+  .meta-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--ink-10);
+    margin-bottom: 56px;
+    border: 1px solid var(--ink-10);
+  }
+
+  .meta-cell {
+    background: var(--paper);
+    padding: 18px 20px;
+  }
+
+  .meta-cell-k {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--ink-30);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .meta-cell-v {
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 300;
+    font-family: 'DM Mono', 'Hiragino Kaku Gothic ProN', monospace;
+  }
+
+  /* ── chat phase ── */
+  .phase-strip {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 40px;
+  }
+
+  .phase-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--rust);
+  }
+
+  .phase-title {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--ink-30);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .phase-line {
+    flex: 1; height: 1px;
+    background: var(--ink-10);
+  }
+
+  /* ── chat bubbles ── */
+  .bubble-wrap { margin-bottom: 32px; }
+
+  .bubble-ai {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+
+  .ai-sigil {
+    width: 26px; height: 26px;
+    border: 1px solid var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .ai-sigil span {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--ink);
+  }
+
+  .bubble-text {
+    background: var(--white);
+    border: 1px solid var(--ink-10);
+    padding: 20px 22px;
+    font-size: 14px;
+    line-height: 1.95;
+    color: var(--ink);
+    max-width: 540px;
+    letter-spacing: 0.01em;
+    font-family: 'DM Mono', 'Hiragino Kaku Gothic ProN', monospace;
+    font-weight: 300;
+    box-shadow: 2px 2px 0px var(--ink-10);
+  }
+
+  .bubble-user {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 28px;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .bubble-user-text {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 14px 18px;
+    font-size: 13px;
+    line-height: 1.75;
+    max-width: 500px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: 'DM Mono', 'Hiragino Kaku Gothic ProN', monospace;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.15);
+  }
+
+  /* ── thinking ── */
+  .thinking { display: none; align-items: center; gap: 16px; margin-bottom: 24px; }
+  .thinking.visible { display: flex; }
+
+  .thinking-inner {
+    background: var(--white);
+    border: 1px solid var(--ink-10);
+    padding: 14px 18px;
+    display: flex; gap: 6px; align-items: center;
+  }
+
+  .dot {
+    width: 4px; height: 4px;
+    background: var(--ink-30);
+    border-radius: 50%;
+    animation: blink 1.4s infinite;
+  }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes blink {
+    0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  /* ── textarea ── */
+  .input-area { margin-top: 12px; }
+
+  textarea {
+    width: 100%;
+    min-height: 120px;
+    background: var(--white);
+    border: 1px solid var(--ink-10);
+    border-bottom: 2px solid var(--ink);
+    padding: 16px 18px;
+    font-family: 'DM Mono', 'Hiragino Kaku Gothic ProN', monospace;
+    font-size: 14px;
+    line-height: 1.85;
+    color: var(--ink);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s, border-bottom-width 0.2s;
+    border-radius: 0;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+
+  textarea:focus {
+    border-color: var(--rust);
+    border-bottom-color: var(--rust);
+    border-bottom-width: 2px;
+  }
+
+  textarea::placeholder {
+    color: var(--ink-30);
+    font-style: italic;
+  }
+
+  .textarea-hint {
+    font-size: 10px;
+    color: var(--ink-30);
+    margin-top: 6px;
+    letter-spacing: 0.08em;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── buttons ── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 15px 30px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    font-weight: 400;
+    position: relative;
+    text-transform: uppercase;
+  }
+
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  .btn-primary:hover { background: var(--rust); }
+  .btn-primary:active { transform: translateY(1px); }
+  .btn-primary:disabled { background: var(--paper-3); color: var(--ink-30); cursor: not-allowed; }
+
+  .btn-arrow {
+    font-size: 14px;
+    transition: transform 0.2s;
+    display: inline-block;
+  }
+  .btn-primary:not(:disabled):hover .btn-arrow { transform: translateX(4px); }
+
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    color: var(--ink-60);
+    border: 1px solid var(--ink-10);
+    padding: 13px 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .btn-back:hover { border-color: var(--ink); color: var(--ink); }
+  .btn-back:disabled { opacity: 0.25; cursor: not-allowed; }
+
+  .btn-skip {
+    font-size: 10px;
+    color: var(--ink-30);
+    background: none;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    padding: 4px 0;
+    font-family: 'DM Mono', monospace;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-transform: uppercase;
+  }
+  .btn-skip:hover { color: var(--ink-60); }
+
+  .input-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .input-footer-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* ── complete screen ── */
+  .complete-mark {
+    width: 52px; height: 52px;
+    border: 1px solid var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 40px;
+  }
+  .complete-mark span { font-size: 22px; color: var(--ink); }
+
+  .complete-kicker {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--rust);
+    margin-bottom: 24px;
+    font-family: 'DM Mono', monospace;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .complete-kicker::before {
+    content: '';
+    display: inline-block;
+    width: 24px; height: 1px;
+    background: var(--rust);
+  }
+
+  .complete-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 28px;
+    font-weight: 300;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .complete-body {
+    font-size: 13px;
+    line-height: 2.0;
+    color: var(--ink-60);
+    margin-bottom: 40px;
+    max-width: 460px;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+
+  .send-status {
+    font-size: 11px;
+    color: var(--ink-30);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+    min-height: 22px;
+    margin-top: 8px;
+  }
+  .send-status.ok { color: #3a7a52; }
+  .send-status.err { color: var(--rust); }
+
+  /* ── decorative rule ── */
+  .h-rule {
+    border: none;
+    border-top: 1px solid var(--ink-10);
+    margin: 48px 0;
+  }
+
+  /* ── responsive ── */
+  @media (max-width: 560px) {
+    header { padding: 18px 24px 16px; }
+    main { padding: 48px 24px 80px; }
+    .welcome-headline { font-size: 26px; }
+    .meta-row { grid-template-columns: 1fr; }
+    .progress-bar { width: 64px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <span class="lw-wordmark">Loftwork</span>
+  <div class="header-divider"></div>
+  <span class="header-sub">MEMBER SURVEY</span>
+  <div class="progress-wrap">
+    <span class="progress-label" id="progressLabel">——</span>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+</header>
+
+<main>
+
+  <!-- WELCOME -->
+  <div class="screen active" id="screen-welcome">
+    <p class="welcome-kicker">FY25–26 ONBOARDING SURVEY</p>
+    <h1 class="welcome-headline">正解はありません。<br>感じたままに、書いてください。</h1>
+    <p class="welcome-lead">
+      あなたの言葉が、次に入ってくる仲間の体験をつくります。<br>
+      このアンケートは採点でも満足度調査でもありません。<br>
+      LWの採用とオンボーディングを、あなたと一緒に育てるための対話です。
+    </p>
+    <div class="meta-row">
+      <div class="meta-cell">
+        <div class="meta-cell-k">Estimated time</div>
+        <div class="meta-cell-v">15〜20分</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-cell-k">Format</div>
+        <div class="meta-cell-v">会話型・自由記述</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-cell-k">Style</div>
+        <div class="meta-cell-v">AIとの対話形式</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-cell-k">Data destination</div>
+        <div class="meta-cell-v">人事チームへメール</div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="startSurvey()">はじめる <span class="btn-arrow">→</span></button>
+  </div>
+
+  <!-- CHAT -->
+  <div class="screen" id="screen-chat">
+    <div class="phase-strip">
+      <span class="phase-num" id="phaseNum">01</span>
+      <span class="phase-title" id="phaseTitle">入社前の記憶</span>
+      <div class="phase-line"></div>
+    </div>
+    <div id="chatArea"></div>
+    <div class="thinking" id="thinking">
+      <div class="ai-sigil"><span>L</span></div>
+      <div class="thinking-inner">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+    <div id="inputArea"></div>
+  </div>
+
+  <!-- COMPLETE -->
+  <div class="screen" id="screen-complete">
+    <div class="complete-mark"><span>✓</span></div>
+    <p class="complete-kicker">SURVEY COMPLETE</p>
+    <h2 class="complete-title">ありがとうございました。</h2>
+    <p class="complete-body">
+      あなたの言葉は、LWの採用とオンボーディングを<br>
+      育てる素材になります。人事チームが大切に読みます。
+    </p>
+    <div class="send-status" id="sendStatus">送信中...</div>
+  </div>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════
+// 認知経路の分岐定義
+// 各経路ごとに：検出キーワード・深掘り質問（2段階）・リアクション文を持つ
+// ═══════════════════════════════════════════════════
+const BRANCHES = {
+
+  // ── 人づて ──────────────────────────────────────
+  person: {
+    triggers: ['人','知人','友人','紹介','在籍','話を聞','聞いた','教えて','OB','OG','先輩','同僚','メンバー','社員','働いてる','働いている'],
+    // q1aへのリアクション（相手の言葉を受けて）
+    react_q1a: (ans) => {
+      if (ans.includes('友人') || ans.includes('知人')) return 'その友人から話を聞いたとき——';
+      if (ans.includes('先輩') || ans.includes('OB') || ans.includes('OG')) return 'その先輩から話を聞いたとき——';
+      return '身近な人から話を聞いたとき——';
+    },
+    // 深掘り質問1（q1a_branch）
+    dig1: 'その人はどんな表情で、どんな言葉でLWのことを話していましたか？\n聞きながら、あなたの頭の中に浮かんだイメージや感情を教えてください。',
+    // 深掘り質問2（q1a_branch2）
+    dig2: 'その話を聞いて、その場でLWのことを調べましたか？\nそれとも少し時間が経ってから、もう一度思い出して調べましたか？',
+    placeholder_dig1: '例：なんか楽しそうに話してて、「自分もそういう場所に行きたい」と思った。',
+    placeholder_dig2: '例：その場ですぐスマホで検索しました。',
+  },
+
+  // ── .comの記事・コンテンツ ───────────────────────
+  content: {
+    triggers: ['記事','インタビュー','loftwork.com','ブログ','サイト','note','web','ウェブ','コンテンツ','読んだ','読んで','読み','メディア','コラム','特集'],
+    react_q1a: (ans) => {
+      if (ans.includes('インタビュー')) return 'そのインタビュー記事に出会ったとき——';
+      if (ans.includes('note')) return 'そのnoteを読んだとき——';
+      return 'その記事を読んだとき——';
+    },
+    dig1: 'その記事の中で、特に「手が止まった」文章や言葉はありましたか？\nどんな一節でしたか？（うろ覚えでも構いません）',
+    dig2: '記事を読み終えたあと、次に何をしましたか？\n（別の記事を読んだ／誰かに送った／ブックマークした／そっと閉じた…など）',
+    placeholder_dig1: '例：「クリエイターが安心して挑戦できる場をつくる」という一文で止まりました。',
+    placeholder_dig2: '例：すぐ採用ページを開いて、求人を確認しました。',
+  },
+
+  // ── 施設・イベント・FabCafe・QWS ────────────────
+  facility: {
+    triggers: ['FabCafe','QWS','施設','イベント','場所','訪問','fabcafe','qws','ファブ','カフェ','渋谷','スペース','会場','展示','ワークショップ','ショップ'],
+    react_q1a: (ans) => {
+      if (ans.includes('FabCafe') || ans.includes('ファブ') || ans.includes('カフェ')) return 'FabCafeを訪れたとき——';
+      if (ans.includes('QWS') || ans.includes('qws')) return 'QWSに行ったとき——';
+      if (ans.includes('イベント')) return 'そのイベントに参加したとき——';
+      return 'その場所を訪れたとき——';
+    },
+    dig1: 'その場に入った瞬間、最初に目に入ったもの・感じたことを教えてください。\nそしてそこにいた人や空気感はどうでしたか？',
+    dig2: 'その施設や体験について、あとから誰かに話したり、SNSに投稿したりしたことはありましたか？\nどんな言葉や表現を使いましたか？（なかった場合は、もし伝えるとしたら何と言いそうかでも）',
+    placeholder_dig1: '例：コーヒーの香りと、何かを作っている人たちの雰囲気がごちゃっとしていて、居心地が良かった。',
+    placeholder_dig2: '例：「こんな場所があるんだ」とInstagramのストーリーに上げました。「クリエイターが集まる変な喫茶店みたいな感じ」と友人に説明しました。',
+  },
+
+  // ── SNS・広告・Wantedly ─────────────────────────
+  sns: {
+    triggers: ['SNS','Instagram','Twitter','X','Facebook','LinkedIn','広告','投稿','Wantedly','wantedly','sns','インスタ','リール','フィード','タイムライン','流れてきた'],
+    react_q1a: (ans) => {
+      if (ans.includes('Instagram') || ans.includes('インスタ') || ans.includes('リール')) return 'そのInstagramの投稿を目にしたとき——';
+      if (ans.includes('Twitter') || ans.includes('X')) return 'そのツイートを目にしたとき——';
+      if (ans.includes('Wantedly') || ans.includes('wantedly')) return 'WantedlyでLWを見かけたとき——';
+      if (ans.includes('広告')) return 'その広告を目にしたとき——';
+      return 'そのSNSの投稿を目にしたとき——';
+    },
+    dig1: 'スクロールしている中でLWの投稿に目が止まった——\nそのとき画面に映っていたのは何でしたか？（人・場所・言葉・雰囲気…何でも）',
+    dig2: 'その投稿を見てすぐにアクションしましたか？\n（プロフィールを見た／保存した／そのまま流した…など）\nそのあとまたLWのことを検索したのはいつ頃でしたか？',
+    placeholder_dig1: '例：誰かが楽しそうに何かをプレゼンしている写真で、キャプションに「正解のない問いに向き合う」と書いてあった。',
+    placeholder_dig2: '例：一度はスルーして、数日後に転職考え始めたときに思い出して調べました。',
+  },
+
+  // ── 検索・求人サイト ────────────────────────────
+  search: {
+    triggers: ['検索','Google','ぐぐ','求人','転職','マイナビ','リクナビ','ビズリーチ','エージェント','スカウト','doda','Indeed','indeedl'],
+    react_q1a: () => '転職・求人の文脈でLWを見つけたとき——',
+    dig1: '求人や会社説明を読んで、最初に「あ、ここちょっと違うかも」と感じた瞬間はありましたか？\nどんな言葉や情報が引っかかりましたか？',
+    dig2: 'LWの求人ページや会社情報を読み進めて、さらに詳しく調べようと思ったきっかけは何でしたか？',
+    placeholder_dig1: '例：「クリエイティブディレクター」という肩書きじゃない職種名に引っかかりました。',
+    placeholder_dig2: '例：代表のメッセージが他の会社と全然違うトーンで書かれていたので、もっと読みたくなりました。',
+  },
+};
+
+// ═══════════════════════════════════════════════════
+// 設問フロー
+// type: 'fixed' = 固定質問 / 'branch' = 分岐後に動的生成
+// ═══════════════════════════════════════════════════
+const FLOW = [
+  // 00 ── はじめに
+  {
+    id: 'q0', phaseNum: '00', phaseTitle: 'はじめに', optional: false,
+    type: 'fixed',
+    text: '今どんな仕事をしていて、入社からどのくらい経ちますか？\nまず少し自分のことを教えてください。',
+    placeholder: '例：渋谷オフィスのCDチームで、入社して5ヶ月目です。',
+  },
+
+  // 01 ── 最初の認知
+  {
+    id: 'q1a', phaseNum: '01', phaseTitle: '入社前の記憶', optional: false,
+    type: 'fixed',
+    text: 'ロフトワークの名前を初めて目にしたか、耳にしたとき——\nそのときあなたは何をしていましたか？どんな状況でしたか？',
+    placeholder: '例：前職でイベントを探していたとき、FabCafeのサイトを見つけたのが最初でした。',
+    onSubmit: 'detectBranch', // 提出後に分岐検出
+  },
+
+  // 02 ── 認知経路の深掘り1（動的）
+  {
+    id: 'q1a_dig1', phaseNum: '01', phaseTitle: '入社前の記憶', optional: true,
+    type: 'branch_dig1',
+    placeholder: '思い出せる範囲で、ありのままに。',
+  },
+
+  // 03 ── 認知経路の深掘り2（動的）
+  {
+    id: 'q1a_dig2', phaseNum: '01', phaseTitle: '入社前の記憶', optional: true,
+    type: 'branch_dig2',
+    placeholder: '思い出せる範囲で、ありのままに。',
+  },
+
+  // 04 ── 応募を決めた瞬間
+  {
+    id: 'q1b', phaseNum: '01', phaseTitle: '入社前の記憶', optional: false,
+    type: 'fixed',
+    text: '「よし、応募してみよう」と思った瞬間のことを教えてください。\nそのとき、最初に誰かに話しましたか？何と言いましたか？',
+    placeholder: '例：友人に「なんかここ面白そうな会社があって」とメッセージを送りました。',
+  },
+
+  // 05 ── 応募直前の頭の中
+  {
+    id: 'q3', phaseNum: '01', phaseTitle: '入社前の記憶', optional: true,
+    type: 'fixed',
+    text: '応募する直前、少し時間がかかった記憶はありますか？\nそのとき頭の中で何が起きていましたか？',
+    placeholder: '例：「本当に自分に合っているのか」とか「今の仕事を辞める踏ん切りがつかない」とか考えていました。',
+  },
+
+  // 06 ── 他社との比較
+  {
+    id: 'q4', phaseNum: '01', phaseTitle: '入社前の記憶', optional: true,
+    type: 'fixed',
+    text: 'LWと並行して受けていた他社の選考で、LWとの対応の違いを感じた具体的な場面はありましたか？\n（良くも悪くも、率直に。会社名も書いてもらえると参考になります）',
+    placeholder: '例：A社は選考フローの説明がメールで丁寧に届いたのに対して、LWは…',
+  },
+
+  // 07 ── 内定を受けたとき
+  {
+    id: 'q5', phaseNum: '01', phaseTitle: '入社前の記憶', optional: false,
+    type: 'fixed',
+    text: '内定の連絡を受けたとき、最初に頭に浮かんだのは何でしたか？\nその日、誰かに話しましたか？何と言いましたか？',
+    placeholder: '例：「決めよう」と思って家族に連絡しました。半面「どんな仕事になるんだろう」という不安もありました。',
+  },
+
+  // 08 ── 入社前後のイメージの変化
+  {
+    id: 'q6', phaseNum: '02', phaseTitle: '今の視点から', optional: false,
+    type: 'fixed',
+    text: '入社前に思い描いていたLWのイメージと、今のLWのイメージ。\n一番変わったことは何ですか？（良い意味でも、意外な意味でも）',
+    placeholder: '例：もっと「おしゃれなデザイン会社」だと思っていたけど、実際はもっと泥くさくて面白かった。',
+  },
+
+  // 09 ── 友人・家族への説明
+  {
+    id: 'q7', phaseNum: '02', phaseTitle: '今の視点から', optional: false,
+    type: 'fixed',
+    text: '友人や家族から「最近仕事どう？」と聞かれたとき、LWのことをどんなふうに説明していますか？\n直近で言った言葉を思い出せたら教えてください。',
+    placeholder: '例：「なんか不思議な会社で、色んな人が面白いことやってる感じ」と言いました。',
+  },
+
+  // 10 ── 腑に落ちた瞬間
+  {
+    id: 'q8', phaseNum: '02', phaseTitle: '今の視点から', optional: false,
+    type: 'fixed',
+    text: '入社してから「あ、これがLWか」と腑に落ちた瞬間はありましたか？\nあるいは逆に「あれ、思っていたのと違う」と感じた瞬間は？',
+    placeholder: '例：初めてクライアントのプレゼンに入ったとき、いい意味で驚きました。',
+  },
+
+  // 11 ── もっと早く知りたかったこと
+  {
+    id: 'q9', phaseNum: '02', phaseTitle: '今の視点から', optional: true,
+    type: 'fixed',
+    text: '「もう少し早くこれを知っていたら、動き方が変わっていたな」と思うことはありますか？\n情報・人・場・タイミング、何でも。',
+    placeholder: '例：誰に何を聞いていいかわからなかった最初の2週間、こういう仕組みがあったら…',
+  },
+
+  // 12 ── 次の仲間のために
+  {
+    id: 'q10', phaseNum: '02', phaseTitle: '今の視点から', optional: false,
+    type: 'fixed',
+    text: 'あなたの後に入ってくる仲間が、入社3ヶ月目に「ここで戦える」と感じるために、\n今のLWに一つだけ付け加えられる要素があるとしたら、それは何ですか？',
+    placeholder: '一つに絞るのが難しければ、一番先に思い浮かんだものを。',
+  },
+
+  // 13 ── 入社前の自分への一言
+  {
+    id: 'q11', phaseNum: '02', phaseTitle: '今の視点から', optional: false,
+    type: 'fixed',
+    text: '入社前の自分に一言だけ伝えられるとしたら、何と言いますか？',
+    placeholder: '短くても、長くても。',
+  },
+
+  // 14 ── 自由記述
+  {
+    id: 'q12', phaseNum: '03', phaseTitle: 'クロージング', optional: true,
+    type: 'fixed',
+    text: 'このアンケートでは聞かれなかったけど、伝えたいことがあれば自由に書いてください。',
+    placeholder: '（任意）',
+  },
+];
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let currentIdx  = 0;
+let answers     = {};
+let detectedBranch = null; // 検出した認知経路キー
+let histStack   = [];      // 戻るボタン用スタック
+
+// ═══════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function detectBranchFromText(text) {
+  for (const [key, b] of Object.entries(BRANCHES)) {
+    if (b.triggers.some(t => text.includes(t))) return key;
+  }
+  return null;
+}
+
+// q1aの回答に対して「受け取った感」のあるリアクション文を返す
+function buildReactionText(branchKey, q1aAnswer) {
+  if (!branchKey) return null;
+  const b = BRANCHES[branchKey];
+  const opener = b.react_q1a(q1aAnswer);
+  return opener;
+}
+
+// 現在のフロー項目を取得（branch_dig系は動的に内容を生成）
+function getCurrentQuestion() {
+  const q = FLOW[currentIdx];
+  if (!q) return null;
+
+  if (q.type === 'branch_dig1') {
+    if (!detectedBranch) return null; // スキップ
+    const b = BRANCHES[detectedBranch];
+    return { ...q, text: b.dig1, placeholder: b.placeholder_dig1 };
+  }
+  if (q.type === 'branch_dig2') {
+    if (!detectedBranch) return null; // スキップ
+    const b = BRANCHES[detectedBranch];
+    return { ...q, text: b.dig2, placeholder: b.placeholder_dig2 };
+  }
+  return q;
+}
+
+function updateProgress() {
+  // 表示上の進捗は、スキップされるbranch_dig系を除いた実質的な設問数をベースに
+  const visible = FLOW.filter(q =>
+    q.type === 'fixed' || (detectedBranch && (q.type === 'branch_dig1' || q.type === 'branch_dig2'))
+  ).length;
+  const pct = Math.round((currentIdx / FLOW.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = Math.min(currentIdx, FLOW.length) + ' / ' + FLOW.length;
+}
+
+// ═══════════════════════════════════════════════════
+// SCREENS
+// ═══════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startSurvey() {
+  showScreen('screen-chat');
+  renderQuestion(currentIdx);
+}
+
+// ═══════════════════════════════════════════════════
+// CHAT ENGINE
+// ═══════════════════════════════════════════════════
+function renderQuestion(idx) {
+  currentIdx = idx;
+  const raw = FLOW[idx];
+  if (!raw) { finishSurvey(); return; }
+
+  // branch_dig系でbranch未検出ならスキップ
+  if ((raw.type === 'branch_dig1' || raw.type === 'branch_dig2') && !detectedBranch) {
+    renderQuestion(idx + 1);
+    return;
+  }
+
+  const q = getCurrentQuestion();
+  if (!q) { renderQuestion(idx + 1); return; }
+
+  document.getElementById('phaseNum').textContent   = q.phaseNum;
+  document.getElementById('phaseTitle').textContent = q.phaseTitle;
+  updateProgress();
+
+  showThinking(true);
+
+  // q1aの回答直後だけ、リアクション文を先に表示してから本題へ
+  const prevId = histStack.length > 0 ? histStack[histStack.length - 1].answerId : null;
+  const delay  = 700;
+
+  sleep(delay).then(() => {
+    showThinking(false);
+
+    // q1a回答後にリアクション → 深掘り1
+    if (q.type === 'branch_dig1' && detectedBranch) {
+      const reaction = buildReactionText(detectedBranch, answers['q1a'] || '');
+      appendAIBubble(reaction + '\n\n' + q.text);
+    } else {
+      appendAIBubble(q.text);
+    }
+
+    renderInput(q);
+  });
+}
+
+function appendAIBubble(text) {
+  const area = document.getElementById('chatArea');
+  const wrap = document.createElement('div');
+  wrap.className = 'bubble-ai bubble-wrap';
+  wrap.innerHTML = `
+    <div class="ai-sigil"><span>L</span></div>
+    <div class="bubble-text">${text.replace(/\n/g,'<br>')}</div>
+  `;
+  area.appendChild(wrap);
+  wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function appendUserBubble(text) {
+  const area = document.getElementById('chatArea');
+  const wrap = document.createElement('div');
+  wrap.className = 'bubble-user';
+  wrap.innerHTML = `<div class="bubble-user-text">${text.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>`;
+  area.appendChild(wrap);
+}
+
+function renderInput(q) {
+  const area = document.getElementById('inputArea');
+  const isFirst = currentIdx === 0;
+  area.innerHTML = `
+    <div class="input-area">
+      <textarea id="currentAnswer" placeholder="${q.placeholder}" rows="5"></textarea>
+      <div class="textarea-hint">Enterで改行 / 「次へ」で送信</div>
+      <div class="input-footer">
+        <button class="btn-back" onclick="goBack()" ${isFirst ? 'disabled' : ''}>← 戻る</button>
+        <div class="input-footer-right">
+          ${q.optional ? `<button class="btn-skip" onclick="submitAnswer(true)">スキップ</button>` : ''}
+          <button class="btn-primary" onclick="submitAnswer(false)">次へ <span class="btn-arrow">→</span></button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('currentAnswer').focus();
+  area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function showThinking(visible) {
+  document.getElementById('thinking').className = 'thinking' + (visible ? ' visible' : '');
+}
+
+// ═══════════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════════
+function submitAnswer(skip = false) {
+  const ta  = document.getElementById('currentAnswer');
+  const val = skip ? '' : (ta ? ta.value.trim() : '');
+  const q   = getCurrentQuestion();
+
+  if (!skip && !q.optional && val === '') {
+    ta.style.borderBottomColor = 'var(--rust)';
+    ta.placeholder = '回答を入力してください。';
+    ta.focus();
+    return;
+  }
+
+  answers[q.id] = val;
+
+  // 認知経路の検出（q1a提出時）
+  if (q.id === 'q1a' && val) {
+    detectedBranch = detectBranchFromText(val);
+  }
+
+  // 履歴に保存
+  const chatArea = document.getElementById('chatArea');
+  histStack.push({
+    idx:        currentIdx,
+    answerId:   q.id,
+    answerText: val,
+    chatHTML:   chatArea.innerHTML,
+    branch:     detectedBranch,
+  });
+
+  if (val) appendUserBubble(val);
+  document.getElementById('inputArea').innerHTML = '';
+
+  const next = currentIdx + 1;
+  if (next >= FLOW.length) {
+    finishSurvey();
+  } else {
+    renderQuestion(next);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// BACK
+// ═══════════════════════════════════════════════════
+function goBack() {
+  if (histStack.length === 0) return;
+
+  const prev = histStack.pop();
+  currentIdx    = prev.idx;
+  detectedBranch = prev.branch;
+
+  // q1aに戻る場合はbranch再検出
+  if (prev.answerId === 'q1a') {
+    detectedBranch = prev.answerText ? detectBranchFromText(prev.answerText) : null;
+  }
+
+  delete answers[prev.answerId];
+
+  const chatArea = document.getElementById('chatArea');
+  chatArea.innerHTML = prev.chatHTML;
+
+  const q = getCurrentQuestion() || FLOW[currentIdx];
+  document.getElementById('phaseNum').textContent   = q.phaseNum;
+  document.getElementById('phaseTitle').textContent = q.phaseTitle;
+  updateProgress();
+
+  renderInput(q);
+  const ta = document.getElementById('currentAnswer');
+  if (ta && prev.answerText) ta.value = prev.answerText;
+  document.getElementById('inputArea').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ═══════════════════════════════════════════════════
+// FINISH
+// ═══════════════════════════════════════════════════
+async function finishSurvey() {
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressLabel').textContent = FLOW.length + ' / ' + FLOW.length;
+  showScreen('screen-complete');
+  await sendToGAS();
+}
+
+// ═══════════════════════════════════════════════════
+// GAS 送信
+// ═══════════════════════════════════════════════════
+const GAS_URL = 'https://script.google.com/a/macros/loftwork.com/s/AKfycbzbAyVVP7BcLwM2MdeiJ0XPEYpcY299bsIPNPQIk-ePaUwK7fVGAhhVj2MIjgantfk2/exec';
+
+const Q_LABELS = {
+  q0:        '【はじめに】現在の仕事・入社時期',
+  q1a:       '【Q1-a】最初にLWを知った状況',
+  q1a_dig1:  '【Q1-a 深掘り①】認知経路の体験・感情',
+  q1a_dig2:  '【Q1-a 深掘り②】認知後の行動',
+  q1b:       '【Q1-b】応募を決めた瞬間・誰に話したか',
+  q3:        '【Q3】応募直前の頭の中',
+  q4:        '【Q4】他社との比較・違いを感じた場面',
+  q5:        '【Q5】内定連絡を受けたとき',
+  q6:        '【Q6】入社前後のイメージの変化',
+  q7:        '【Q7】友人・家族にLWをどう説明しているか',
+  q8:        '【Q8】「これがLWか」と腑に落ちた瞬間',
+  q9:        '【Q9】もっと早く知っていればよかったこと',
+  q10:       '【Q10】次の仲間のために付け加えるなら',
+  q11:       '【Q11】入社前の自分への一言',
+  q12:       '【クロージング】自由記述',
+};
+
+async function sendToGAS() {
+  const statusEl = document.getElementById('sendStatus');
+
+  // スプレッドシートに1行で書き込むための列順リスト
+  const COLUMNS = ['q0','q1a','q1a_dig1','q1a_dig2','q1b','q3','q4','q5','q6','q7','q8','q9','q10','q11','q12'];
+  const row = COLUMNS.map(id => answers[id] || '');
+
+  const payload = {
+    answers,
+    branchDetected: detectedBranch || '',
+    row,          // スプレッドシート1行分の配列
+    timestamp: new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }),
+  };
+
+  try {
+    const encoded = encodeURIComponent(JSON.stringify(payload));
+    await fetch(GAS_URL + '?payload=' + encoded, { method: 'GET', mode: 'no-cors' });
+    statusEl.className   = 'send-status ok';
+    statusEl.textContent = '✓ 送信されました。';
+  } catch (err) {
+    console.error(err);
+    statusEl.className   = 'send-status err';
+    statusEl.textContent = '⚠ 送信に失敗しました。下記をコピーして人事チームにお送りください。';
+    const fallback = document.createElement('pre');
+    fallback.style.cssText = 'margin-top:20px;font-size:11px;background:var(--white);padding:16px;border:1px solid var(--ink-10);overflow:auto;max-height:320px;white-space:pre-wrap;word-break:break-all;line-height:1.8;font-family:DM Mono,monospace;';
+    fallback.textContent = Object.entries(Q_LABELS)
+      .map(([id, label]) => answers[id] ? label + '\n' + answers[id] : null)
+      .filter(Boolean).join('\n\n');
+    statusEl.after(fallback);
+  }
+}
+</script>
+</body>
+</html>
