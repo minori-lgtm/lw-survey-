@@ -505,7 +505,7 @@
 <header>
   <span class="lw-wordmark">Loftwork</span>
   <div class="header-divider"></div>
-  <span class="header-sub">MEMBER SURVEY</span>
+  <span class="header-sub">入社体験の振り返り</span>
   <div class="progress-wrap">
     <span class="progress-label" id="progressLabel">——</span>
     <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
@@ -516,29 +516,35 @@
 
   <!-- WELCOME -->
   <div class="screen active" id="screen-welcome">
-    <p class="welcome-kicker">FY25–26 ONBOARDING SURVEY</p>
+    <p class="welcome-kicker">FY25–26 入社体験の振り返り</p>
     <h1 class="welcome-headline">正解はありません。<br>感じたままに、書いてください。</h1>
     <p class="welcome-lead">
-      あなたの言葉が、次に入ってくる仲間の体験をつくります。<br>
-      このアンケートは採点でも満足度調査でもありません。<br>
-      LWの採用とオンボーディングを、あなたと一緒に育てるための対話です。
+      あなた自身の入社体験を振り返る対話です。<br>
+      回答は採用プロセスの改善と、次に入ってくる仲間の<br>
+      オンボーディングをよくするために使います。
     </p>
-    <div class="meta-row">
+    <div class="meta-row" style="grid-template-columns:1fr 1fr 1fr;">
+      <div class="meta-cell">
+        <div class="meta-cell-k">— 評価ではありません</div>
+        <div class="meta-cell-v" style="font-size:12px;line-height:1.8;">あなたが評価されることはありません。感じたことをそのまま書いてください。</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-cell-k">— 途中保存されます</div>
+        <div class="meta-cell-v" style="font-size:12px;line-height:1.8;">同じブラウザ・同じ端末なら、ページを閉じても回答は残ります。別の端末やキャッシュ削除では消えます。</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-cell-k">— 回答を手元に残せます</div>
+        <div class="meta-cell-v" style="font-size:12px;line-height:1.8;">完了画面に回答内容が表示されます。手元に残したい場合はそのままコピーしてください。</div>
+      </div>
+    </div>
+    <div class="meta-row" style="grid-template-columns:1fr 1fr;">
       <div class="meta-cell">
         <div class="meta-cell-k">Estimated time</div>
-        <div class="meta-cell-v">15〜20分</div>
+        <div class="meta-cell-v">8〜10分</div>
       </div>
       <div class="meta-cell">
         <div class="meta-cell-k">Format</div>
         <div class="meta-cell-v">会話型・自由記述</div>
-      </div>
-      <div class="meta-cell">
-        <div class="meta-cell-k">Style</div>
-        <div class="meta-cell-v">AIとの対話形式</div>
-      </div>
-      <div class="meta-cell">
-        <div class="meta-cell-k">Data destination</div>
-        <div class="meta-cell-v">人事チームへメール</div>
       </div>
     </div>
     <button class="btn-primary" onclick="startSurvey()">はじめる <span class="btn-arrow">→</span></button>
@@ -571,6 +577,10 @@
       育てる素材になります。人事チームが大切に読みます。
     </p>
     <div class="send-status" id="sendStatus">送信中...</div>
+    <div id="answerSummary" style="margin-top:40px;display:none;">
+      <p style="font-size:10px;letter-spacing:0.15em;color:var(--ink-30);margin-bottom:16px;font-family:'DM Mono',monospace;">YOUR ANSWERS — 手元に残したい場合はコピーしてください</p>
+      <pre id="answerText" style="font-size:12px;line-height:2.0;background:var(--white);border:1px solid var(--ink-10);padding:20px;white-space:pre-wrap;word-break:break-all;font-family:'DM Mono','Hiragino Kaku Gothic ProN',monospace;color:var(--ink);"></pre>
+    </div>
   </div>
 
 </main>
@@ -584,7 +594,7 @@ const BRANCHES = {
 
   // ── 人づて ──────────────────────────────────────
   person: {
-    triggers: ['人','知人','友人','紹介','在籍','話を聞','聞いた','教えて','OB','OG','先輩','同僚','メンバー','社員','働いてる','働いている'],
+    triggers: ['知人から','知人に','友人から','友人に','友人が','紹介された','紹介してもらった','話を聞いた','話を聞いて','先輩から','先輩に','同僚から','同僚に','OBから','OGから','働いている人から','働いている人に'],
     // q1aへのリアクション（相手の言葉を受けて）
     react_q1a: (ans) => {
       if (ans.includes('友人') || ans.includes('知人')) return 'その友人から話を聞いたとき——';
@@ -691,15 +701,7 @@ const FLOW = [
     placeholder: '思い出せる範囲で、ありのままに。',
   },
 
-  // 04 ── 応募を決めた瞬間
-  {
-    id: 'q1b', phaseNum: '01', phaseTitle: '入社前の記憶', optional: false,
-    type: 'fixed',
-    text: '「よし、応募してみよう」と思った瞬間のことを教えてください。\nそのとき、最初に誰かに話しましたか？何と言いましたか？',
-    placeholder: '例：友人に「なんかここ面白そうな会社があって」とメッセージを送りました。',
-  },
-
-  // 05 ── 応募直前の頭の中
+  // 04 ── 応募直前の頭の中
   {
     id: 'q3', phaseNum: '01', phaseTitle: '入社前の記憶', optional: true,
     type: 'fixed',
@@ -707,7 +709,7 @@ const FLOW = [
     placeholder: '例：「本当に自分に合っているのか」とか「今の仕事を辞める踏ん切りがつかない」とか考えていました。',
   },
 
-  // 06 ── 他社との比較
+  // 05 ── 他社との比較
   {
     id: 'q4', phaseNum: '01', phaseTitle: '入社前の記憶', optional: true,
     type: 'fixed',
@@ -715,7 +717,7 @@ const FLOW = [
     placeholder: '例：A社は選考フローの説明がメールで丁寧に届いたのに対して、LWは…',
   },
 
-  // 07 ── 内定を受けたとき
+  // 06 ── 内定を受けたとき
   {
     id: 'q5', phaseNum: '01', phaseTitle: '入社前の記憶', optional: false,
     type: 'fixed',
@@ -723,15 +725,15 @@ const FLOW = [
     placeholder: '例：「決めよう」と思って家族に連絡しました。半面「どんな仕事になるんだろう」という不安もありました。',
   },
 
-  // 08 ── 入社前後のイメージの変化
+  // 07 ── 入社前後のイメージの変化＋腑に落ちた瞬間（統合）
   {
     id: 'q6', phaseNum: '02', phaseTitle: '今の視点から', optional: false,
     type: 'fixed',
-    text: '入社前に思い描いていたLWのイメージと、今のLWのイメージ。\n一番変わったことは何ですか？（良い意味でも、意外な意味でも）',
-    placeholder: '例：もっと「おしゃれなデザイン会社」だと思っていたけど、実際はもっと泥くさくて面白かった。',
+    text: '入社してみて、LWのイメージは変わりましたか？\n「あ、これがLWか」と腑に落ちた瞬間でも、「思っていたのと違う」と感じた瞬間でも——入社前と今で一番変わったことを教えてください。',
+    placeholder: '例：もっとおしゃれなデザイン会社だと思っていたけど、実際はもっと泥くさくて面白かった。',
   },
 
-  // 09 ── 友人・家族への説明
+  // 08 ── 友人・家族への説明
   {
     id: 'q7', phaseNum: '02', phaseTitle: '今の視点から', optional: false,
     type: 'fixed',
@@ -739,44 +741,12 @@ const FLOW = [
     placeholder: '例：「なんか不思議な会社で、色んな人が面白いことやってる感じ」と言いました。',
   },
 
-  // 10 ── 腑に落ちた瞬間
-  {
-    id: 'q8', phaseNum: '02', phaseTitle: '今の視点から', optional: false,
-    type: 'fixed',
-    text: '入社してから「あ、これがLWか」と腑に落ちた瞬間はありましたか？\nあるいは逆に「あれ、思っていたのと違う」と感じた瞬間は？',
-    placeholder: '例：初めてクライアントのプレゼンに入ったとき、いい意味で驚きました。',
-  },
-
-  // 11 ── もっと早く知りたかったこと
+  // 09 ── もっと早く知りたかったこと
   {
     id: 'q9', phaseNum: '02', phaseTitle: '今の視点から', optional: true,
     type: 'fixed',
     text: '「もう少し早くこれを知っていたら、動き方が変わっていたな」と思うことはありますか？\n情報・人・場・タイミング、何でも。',
     placeholder: '例：誰に何を聞いていいかわからなかった最初の2週間、こういう仕組みがあったら…',
-  },
-
-  // 12 ── 次の仲間のために
-  {
-    id: 'q10', phaseNum: '02', phaseTitle: '今の視点から', optional: false,
-    type: 'fixed',
-    text: 'あなたの後に入ってくる仲間が、入社3ヶ月目に「ここで戦える」と感じるために、\n今のLWに一つだけ付け加えられる要素があるとしたら、それは何ですか？',
-    placeholder: '一つに絞るのが難しければ、一番先に思い浮かんだものを。',
-  },
-
-  // 13 ── 入社前の自分への一言
-  {
-    id: 'q11', phaseNum: '02', phaseTitle: '今の視点から', optional: false,
-    type: 'fixed',
-    text: '入社前の自分に一言だけ伝えられるとしたら、何と言いますか？',
-    placeholder: '短くても、長くても。',
-  },
-
-  // 14 ── 自由記述
-  {
-    id: 'q12', phaseNum: '03', phaseTitle: 'クロージング', optional: true,
-    type: 'fixed',
-    text: 'このアンケートでは聞かれなかったけど、伝えたいことがあれば自由に書いてください。',
-    placeholder: '（任意）',
   },
 ];
 
@@ -789,12 +759,44 @@ let detectedBranch = null; // 検出した認知経路キー
 let histStack   = [];      // 戻るボタン用スタック
 
 // ═══════════════════════════════════════════════════
+// 下書き保存（localStorage）
+// ═══════════════════════════════════════════════════
+const DRAFT_KEY = 'lw_survey_draft';
+
+function saveDraft() {
+  try {
+    const chatArea = document.getElementById('chatArea');
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({
+      currentIdx, answers, detectedBranch,
+      chatHTML: chatArea ? chatArea.innerHTML : ''
+    }));
+  } catch(e) {}
+}
+
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return false;
+    const draft = JSON.parse(raw);
+    if (!draft || draft.currentIdx === undefined || draft.currentIdx === 0) return false;
+    return draft;
+  } catch(e) { return false; }
+}
+
+function clearDraft() {
+  try { localStorage.removeItem(DRAFT_KEY); } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════
 // UTILS
 // ═══════════════════════════════════════════════════
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 function detectBranchFromText(text) {
-  for (const [key, b] of Object.entries(BRANCHES)) {
+  // 施設→SNS→コンテンツ→検索→人づての順で検出（具体的なものを優先）
+  const order = ['facility','sns','content','search','person'];
+  for (const key of order) {
+    const b = BRANCHES[key];
     if (b.triggers.some(t => text.includes(t))) return key;
   }
   return null;
@@ -846,6 +848,14 @@ function showScreen(id) {
 
 function startSurvey() {
   showScreen('screen-chat');
+  const draft = loadDraft();
+  if (draft) {
+    currentIdx     = draft.currentIdx;
+    answers        = draft.answers || {};
+    detectedBranch = draft.detectedBranch || null;
+    const chatArea = document.getElementById('chatArea');
+    if (chatArea && draft.chatHTML) chatArea.innerHTML = draft.chatHTML;
+  }
   renderQuestion(currentIdx);
 }
 
@@ -969,6 +979,7 @@ function submitAnswer(skip = false) {
 
   if (val) appendUserBubble(val);
   document.getElementById('inputArea').innerHTML = '';
+  saveDraft();
 
   const next = currentIdx + 1;
   if (next >= FLOW.length) {
@@ -1013,9 +1024,25 @@ function goBack() {
 // FINISH
 // ═══════════════════════════════════════════════════
 async function finishSurvey() {
+  clearDraft();
   document.getElementById('progressFill').style.width = '100%';
   document.getElementById('progressLabel').textContent = FLOW.length + ' / ' + FLOW.length;
   showScreen('screen-complete');
+
+  // 回答サマリーを表示
+  const labels = {
+    q0:'はじめに', q1a:'最初にLWを知った状況', q1a_dig1:'深掘り①', q1a_dig2:'深掘り②',
+    q3:'応募直前の頭の中', q4:'他社との比較', q5:'内定連絡を受けたとき',
+    q6:'入社前後のイメージ・腑に落ちた瞬間', q7:'友人・家族への説明', q9:'もっと早く知りたかったこと'
+  };
+  const lines = Object.entries(labels)
+    .map(([id, label]) => answers[id] ? `【${label}】\n${answers[id]}` : null)
+    .filter(Boolean).join('\n\n');
+  if (lines) {
+    document.getElementById('answerText').textContent = lines;
+    document.getElementById('answerSummary').style.display = 'block';
+  }
+
   await sendToGAS();
 }
 
