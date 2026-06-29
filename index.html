@@ -571,23 +571,12 @@
     <div class="complete-mark"><span>✓</span></div>
     <p class="complete-kicker">SURVEY COMPLETE</p>
     <h2 class="complete-title">ありがとうございました。</h2>
-    <p class="complete-body">
-      あなたの言葉は、LWの採用とオンボーディングを<br>
-      育てる素材になります。人事チームが大切に読みます。
-    </p>
     <div class="send-status" id="sendStatus">送信中...</div>
 
-    <!-- 物語風サマリー -->
+    <!-- あなたの記録 -->
     <div id="storySummaryWrap" style="margin-top:48px;display:none;">
-      <p style="font-size:10px;letter-spacing:0.15em;color:var(--rust);margin-bottom:16px;font-family:'DM Mono',monospace;">— YOUR STORY</p>
-      <div id="storyLoading" style="font-size:13px;color:var(--ink-30);font-family:'DM Mono',monospace;letter-spacing:0.05em;">あなたの物語を生成しています...</div>
-      <div id="storyText" style="display:none;font-size:14px;line-height:2.2;color:var(--ink);font-family:'Shippori Mincho',serif;font-weight:300;background:var(--white);border:1px solid var(--ink-10);padding:28px 24px;box-shadow:2px 2px 0 var(--ink-10);"></div>
-    </div>
-
-    <!-- 回答全文 -->
-    <div id="answerSummary" style="margin-top:40px;display:none;">
-      <p style="font-size:10px;letter-spacing:0.15em;color:var(--ink-30);margin-bottom:16px;font-family:'DM Mono',monospace;">YOUR ANSWERS — 手元に残したい場合はコピーしてください</p>
-      <pre id="answerText" style="font-size:12px;line-height:2.0;background:var(--white);border:1px solid var(--ink-10);padding:20px;white-space:pre-wrap;word-break:break-all;font-family:'DM Mono','Hiragino Kaku Gothic ProN',monospace;color:var(--ink);"></pre>
+      <p style="font-size:10px;letter-spacing:0.15em;color:var(--rust);margin-bottom:24px;font-family:'DM Mono',monospace;">— あなたの記録</p>
+      <div id="storyText" style="font-size:14px;line-height:2.4;color:var(--ink);font-family:'Shippori Mincho',serif;font-weight:300;"></div>
     </div>
   </div>
 
@@ -1036,97 +1025,41 @@ async function finishSurvey() {
   document.getElementById('progressFill').style.width = '100%';
   document.getElementById('progressLabel').textContent = FLOW.length + ' / ' + FLOW.length;
   showScreen('screen-complete');
-
-  // 回答全文表示
-  const labels = {
-    q0:'はじめに', q1a:'最初にLWを知った状況', q1a_dig1:'深掘り①', q1a_dig2:'深掘り②',
-    q3:'応募直前の頭の中', q4:'他社との比較', q5:'内定連絡を受けたとき',
-    q6:'入社前後のイメージ・腑に落ちた瞬間', q7:'友人・家族への説明', q9:'もっと早く知りたかったこと'
-  };
-  const lines = Object.entries(labels)
-    .map(([id, label]) => answers[id] ? `【${label}】\n${answers[id]}` : null)
-    .filter(Boolean).join('\n\n');
-  if (lines) {
-    document.getElementById('answerText').textContent = lines;
-    document.getElementById('answerSummary').style.display = 'block';
-  }
-
-  // GAS送信と物語生成を並行実行
+  showRecord();
   sendToGAS();
-  generateStory();
 }
 
 // ═══════════════════════════════════════════════════
-// 物語風サマリー生成（Claude API）
+// あなたの記録（整形表示）
 // ═══════════════════════════════════════════════════
-async function generateStory() {
+function showRecord() {
   const wrap = document.getElementById('storySummaryWrap');
-  const loading = document.getElementById('storyLoading');
   const storyEl = document.getElementById('storyText');
 
-  wrap.style.display = 'block';
+  const sections = [
+    { id: 'q1a',      label: 'LWとの出会い' },
+    { id: 'q1a_dig1', label: 'そのときの感情' },
+    { id: 'q1a_dig2', label: 'そのあとの行動' },
+    { id: 'q3',       label: '応募前に考えていたこと' },
+    { id: 'q4',       label: '他社との違い' },
+    { id: 'q5',       label: '内定を受けたとき' },
+    { id: 'q6',       label: '入社前後で変わったこと' },
+    { id: 'q7',       label: '人に説明するとき' },
+    { id: 'q9',       label: 'もっと早く知りたかったこと' },
+  ];
 
-  const labels = {
-    q0:'現在の仕事・入社時期',
-    q1a:'最初にLWを知った状況',
-    q1a_dig1:'その時の感情・体験',
-    q1a_dig2:'その後の行動',
-    q3:'応募直前の頭の中',
-    q4:'他社との比較',
-    q5:'内定を受けたとき',
-    q6:'入社前後のイメージの変化・腑に落ちた瞬間',
-    q7:'友人・家族への説明',
-    q9:'もっと早く知りたかったこと'
-  };
+  const html = sections
+    .filter(s => answers[s.id])
+    .map(s => `
+      <div style="margin-bottom:36px;">
+        <p style="font-size:9px;letter-spacing:0.2em;color:var(--ink-30);font-family:'DM Mono',monospace;margin-bottom:10px;text-transform:uppercase;">${s.label}</p>
+        <p style="font-size:14px;line-height:2.1;color:var(--ink);">${answers[s.id].replace(/\n/g,'<br>')}</p>
+      </div>
+    `).join('<hr style="border:none;border-top:1px solid var(--ink-10);margin:0 0 36px;">');
 
-  const answerText = Object.entries(labels)
-    .map(([id, label]) => answers[id] ? `${label}：${answers[id]}` : null)
-    .filter(Boolean).join('\n');
-
-  const prompt = `以下は、ロフトワーク（LW）に入社したメンバーのアンケート回答です。
-この回答をもとに、その人の「LWとの出会いから今に至る物語」を600〜800字の日本語散文で書いてください。
-
-執筆の条件：
-- 「あなた」を主語にした二人称視点で書く
-- 最初にLWを知った瞬間の具体的なシーンから始める
-- 感情・情景・身体感覚を丁寧に描写する（例：どんな場所で、何を感じ、何が頭をよぎったか）
-- 回答内容を直接引用せず、物語として再構成する
-- 応募・内定・入社という時間の流れを自然につなぐ
-- 最後は「今のあなた」がどこに立っているかで締めくくる
-- タイトル・見出し・箇条書きは不要。純粋な散文のみ
-- 美しく読みやすい日本語で書く
-
-回答内容：
-${answerText}`;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1500,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content && data.content[0] ? data.content[0].text : '';
-
-    if (text) {
-      loading.style.display = 'none';
-      storyEl.style.display = 'block';
-      storyEl.textContent = text;
-    } else {
-      loading.style.display = 'none';
-      storyEl.style.display = 'block';
-      storyEl.style.color = 'var(--ink-30)';
-      storyEl.textContent = '物語を生成できませんでした。回答内容は下の「YOUR ANSWERS」からご確認ください。';
-    }
-  } catch(e) {
-    loading.style.display = 'none';
-    storyEl.style.display = 'block';
-    storyEl.style.color = 'var(--ink-30)';
-    storyEl.textContent = '物語を生成できませんでした。回答内容は下の「YOUR ANSWERS」からご確認ください。';
+  if (html) {
+    storyEl.innerHTML = html;
+    wrap.style.display = 'block';
   }
 }
 
