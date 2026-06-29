@@ -519,22 +519,22 @@
     <p class="welcome-kicker">FY25–26 入社体験の振り返り</p>
     <h1 class="welcome-headline">正解はありません。<br>感じたままに、書いてください。</h1>
     <p class="welcome-lead">
-      あなた自身の入社体験を振り返る対話です。<br>
+      あなたとロフトワークの出会いを振り返ることで、あなた自身の「今」を知るきっかけにしてください。<br><br>
       回答は採用プロセスの改善と、次に入ってくる仲間の<br>
-      オンボーディングをよくするために使います。
+      オンボーディングをよくするためにも使います。
     </p>
     <div class="meta-row" style="grid-template-columns:1fr 1fr 1fr;">
       <div class="meta-cell">
-        <div class="meta-cell-k">— 評価ではありません</div>
+        <div class="meta-cell-k" style="color:var(--rust);">— 評価ではありません</div>
         <div class="meta-cell-v" style="font-size:12px;line-height:1.8;">あなたが評価されることはありません。感じたことをそのまま書いてください。</div>
       </div>
       <div class="meta-cell">
-        <div class="meta-cell-k">— 途中保存されます</div>
+        <div class="meta-cell-k" style="color:var(--gold);">— 途中保存されます</div>
         <div class="meta-cell-v" style="font-size:12px;line-height:1.8;">同じブラウザ・同じ端末なら、ページを閉じても回答は残ります。別の端末やキャッシュ削除では消えます。</div>
       </div>
       <div class="meta-cell">
-        <div class="meta-cell-k">— 回答を手元に残せます</div>
-        <div class="meta-cell-v" style="font-size:12px;line-height:1.8;">完了画面に回答内容が表示されます。手元に残したい場合はそのままコピーしてください。</div>
+        <div class="meta-cell-k" style="color:#3a7a52;">— 物語として保存できます</div>
+        <div class="meta-cell-v" style="font-size:12px;line-height:1.8;">完了画面であなたの体験が物語としてまとめられます。URLをコピーして手元に保存したり、誰かに送ったりできます。</div>
       </div>
     </div>
     <div class="meta-row" style="grid-template-columns:1fr 1fr;">
@@ -577,6 +577,19 @@
       育てる素材になります。人事チームが大切に読みます。
     </p>
     <div class="send-status" id="sendStatus">送信中...</div>
+
+    <!-- 物語風サマリー -->
+    <div id="storySummaryWrap" style="margin-top:48px;display:none;">
+      <p style="font-size:10px;letter-spacing:0.15em;color:var(--rust);margin-bottom:16px;font-family:'DM Mono',monospace;">— YOUR STORY</p>
+      <div id="storyLoading" style="font-size:13px;color:var(--ink-30);font-family:'DM Mono',monospace;letter-spacing:0.05em;">あなたの物語を生成しています...</div>
+      <div id="storyText" style="display:none;font-size:14px;line-height:2.2;color:var(--ink);font-family:'Shippori Mincho',serif;font-weight:300;background:var(--white);border:1px solid var(--ink-10);padding:28px 24px;box-shadow:2px 2px 0 var(--ink-10);"></div>
+      <div id="shareWrap" style="display:none;margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        <button class="btn-primary" onclick="copyStoryUrl()" id="shareBtn">URLをコピー <span class="btn-arrow">→</span></button>
+        <span id="shareFeedback" style="font-size:11px;color:#3a7a52;font-family:'DM Mono',monospace;opacity:0;transition:opacity 0.3s;">コピーしました</span>
+      </div>
+    </div>
+
+    <!-- 回答全文 -->
     <div id="answerSummary" style="margin-top:40px;display:none;">
       <p style="font-size:10px;letter-spacing:0.15em;color:var(--ink-30);margin-bottom:16px;font-family:'DM Mono',monospace;">YOUR ANSWERS — 手元に残したい場合はコピーしてください</p>
       <pre id="answerText" style="font-size:12px;line-height:2.0;background:var(--white);border:1px solid var(--ink-10);padding:20px;white-space:pre-wrap;word-break:break-all;font-family:'DM Mono','Hiragino Kaku Gothic ProN',monospace;color:var(--ink);"></pre>
@@ -1029,7 +1042,7 @@ async function finishSurvey() {
   document.getElementById('progressLabel').textContent = FLOW.length + ' / ' + FLOW.length;
   showScreen('screen-complete');
 
-  // 回答サマリーを表示
+  // 回答全文表示
   const labels = {
     q0:'はじめに', q1a:'最初にLWを知った状況', q1a_dig1:'深掘り①', q1a_dig2:'深掘り②',
     q3:'応募直前の頭の中', q4:'他社との比較', q5:'内定連絡を受けたとき',
@@ -1043,8 +1056,110 @@ async function finishSurvey() {
     document.getElementById('answerSummary').style.display = 'block';
   }
 
-  await sendToGAS();
+  // GAS送信と物語生成を並行実行
+  sendToGAS();
+  generateStory();
 }
+
+// ═══════════════════════════════════════════════════
+// 物語風サマリー生成（Claude API）
+// ═══════════════════════════════════════════════════
+let generatedStory = '';
+
+async function generateStory() {
+  const wrap = document.getElementById('storySummaryWrap');
+  const loading = document.getElementById('storyLoading');
+  const storyEl = document.getElementById('storyText');
+  const shareWrap = document.getElementById('shareWrap');
+
+  wrap.style.display = 'block';
+
+  // 回答をテキストにまとめる
+  const labels = {
+    q0:'現在の仕事・入社時期', q1a:'最初にLWを知った状況',
+    q1a_dig1:'その時の感情・体験', q1a_dig2:'その後の行動',
+    q3:'応募直前の頭の中', q4:'他社との比較',
+    q5:'内定を受けたとき', q6:'入社前後のイメージの変化と腑に落ちた瞬間',
+    q7:'友人・家族への説明', q9:'もっと早く知りたかったこと'
+  };
+  const answerText = Object.entries(labels)
+    .map(([id, label]) => answers[id] ? `${label}：${answers[id]}` : null)
+    .filter(Boolean).join('\n');
+
+  const prompt = `以下は、ロフトワーク（LW）に入社したメンバーのアンケート回答です。
+この回答をもとに、その人の「LWとの出会いから今に至る物語」を400〜600字の日本語で書いてください。
+
+条件：
+- 一人称（「私は」「あなたは」ではなく三人称または「ある人が」のような語り口）
+- 評価・判断をせず、その人の体験・感情の流れを丁寧に描写する
+- 美しい日本語の散文で書く
+- タイトルは不要
+
+回答内容：
+${answerText}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content && data.content[0] ? data.content[0].text : '';
+
+    if (text) {
+      generatedStory = text;
+      loading.style.display = 'none';
+      storyEl.style.display = 'block';
+      storyEl.textContent = text;
+      shareWrap.style.display = 'flex';
+    } else {
+      loading.textContent = '生成できませんでした。';
+    }
+  } catch(e) {
+    loading.textContent = '生成できませんでした。';
+  }
+}
+
+// URLシェア
+function copyStoryUrl() {
+  if (!generatedStory) return;
+  const encoded = encodeURIComponent(generatedStory);
+  const url = window.location.origin + window.location.pathname + '#story=' + encoded;
+  navigator.clipboard.writeText(url).then(() => {
+    const fb = document.getElementById('shareFeedback');
+    fb.style.opacity = '1';
+    setTimeout(() => { fb.style.opacity = '0'; }, 2000);
+  });
+}
+
+// ページ読み込み時にURLハッシュからサマリーを復元
+(function() {
+  const hash = window.location.hash;
+  if (hash && hash.startsWith('#story=')) {
+    try {
+      const story = decodeURIComponent(hash.replace('#story=', ''));
+      if (story) {
+        // ウェルカム画面を非表示にしてサマリー画面を表示
+        document.addEventListener('DOMContentLoaded', () => {
+          showScreen('screen-complete');
+          document.getElementById('storySummaryWrap').style.display = 'block';
+          document.getElementById('storyLoading').style.display = 'none';
+          const storyEl = document.getElementById('storyText');
+          storyEl.style.display = 'block';
+          storyEl.textContent = story;
+          generatedStory = story;
+          document.getElementById('shareWrap').style.display = 'flex';
+          document.getElementById('sendStatus').style.display = 'none';
+        });
+      }
+    } catch(e) {}
+  }
+})();
 
 // ═══════════════════════════════════════════════════
 // GAS 送信
