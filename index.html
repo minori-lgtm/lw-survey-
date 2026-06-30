@@ -566,6 +566,17 @@
     <div id="inputArea"></div>
   </div>
 
+  <!-- CONFIRM -->
+  <div class="screen" id="screen-confirm">
+    <p class="welcome-kicker">最終確認</p>
+    <h1 class="welcome-headline" style="font-size:28px;">ここまでの回答を<br>送信しますか？</h1>
+    <p class="welcome-lead">送信すると、ここまでの回答は変更できません。</p>
+    <div class="input-footer" style="margin-top:40px;justify-content:flex-start;gap:16px;">
+      <button class="btn-back" onclick="backFromConfirm()">← 戻る</button>
+      <button class="btn-primary" onclick="confirmSubmit()">送信する <span class="btn-arrow">→</span></button>
+    </div>
+  </div>
+
   <!-- COMPLETE -->
   <div class="screen" id="screen-complete">
     <div class="complete-mark"><span>✓</span></div>
@@ -972,10 +983,30 @@ function submitAnswer(skip = false) {
 
   const next = currentIdx + 1;
   if (next >= FLOW.length) {
-    finishSurvey();
+    showScreen('screen-confirm');
   } else {
     renderQuestion(next);
   }
+}
+
+// ═══════════════════════════════════════════════════
+// CONFIRM SCREEN
+// ═══════════════════════════════════════════════════
+function backFromConfirm() {
+  showScreen('screen-chat');
+  renderQuestion(FLOW.length - 1);
+  // 直前の回答をテキストエリアに復元
+  const lastQ = getCurrentQuestion();
+  if (lastQ && answers[lastQ.id] !== undefined) {
+    setTimeout(() => {
+      const ta = document.getElementById('currentAnswer');
+      if (ta) ta.value = answers[lastQ.id];
+    }, 750);
+  }
+}
+
+function confirmSubmit() {
+  finishSurvey();
 }
 
 // ═══════════════════════════════════════════════════
