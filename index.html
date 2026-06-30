@@ -532,8 +532,8 @@
         <div class="meta-cell-v" style="font-size:12px;line-height:1.8;">同じブラウザ・同じ端末なら、ページを閉じても回答は残ります。別の端末やキャッシュ削除では消えます。</div>
       </div>
       <div class="meta-cell">
-        <div class="meta-cell-k" style="color:#3a7a52;">— 物語として保存できます</div>
-        <div class="meta-cell-v" style="font-size:12px;line-height:1.8;">完了画面であなたの体験が物語としてまとめられます。URLをコピーして手元に保存したり、誰かに送ったりできます。</div>
+        <div class="meta-cell-k" style="color:#3a7a52;">— フィードバックがあります</div>
+        <div class="meta-cell-v" style="font-size:12px;line-height:1.8;">ロフトワークにジョインする仲間の前歴や経路はさまざま。匿名で集めた情報を（個人が特定されない粒度で）マッピングしてみなさんに共有したいと思います。お楽しみに！</div>
       </div>
     </div>
     <div class="meta-row" style="grid-template-columns:1fr 1fr;">
@@ -591,7 +591,7 @@ const BRANCHES = {
 
   // ── 人づて ──────────────────────────────────────
   person: {
-    triggers: ['知人から','知人に','友人から','友人に','友人が','紹介された','紹介してもらった','話を聞いた','話を聞いて','先輩から','先輩に','同僚から','同僚に','OBから','OGから','働いている人から','働いている人に'],
+    triggers: ['知人から','知人に','友人から','友人に','友人が','家族から','家族に','紹介された','紹介してもらった','勧められた','すすめられた','話を聞いた','話を聞いて','先輩から','先輩に','同僚から','同僚に','OBから','OGから','働いている人から','働いている人に'],
     // q1aへのリアクション（相手の言葉を受けて）
     react_q1a: (ans) => {
       if (ans.includes('友人') || ans.includes('知人')) return 'その友人から話を聞いたとき——';
@@ -655,8 +655,8 @@ const BRANCHES = {
   search: {
     triggers: ['検索','Google','ぐぐ','求人','転職','マイナビ','リクナビ','ビズリーチ','エージェント','スカウト','doda','Indeed','indeedl'],
     react_q1a: () => '転職・求人の文脈でLWを見つけたとき——',
-    dig1: 'その情報を読んで、最初に「あ、この会社他とちょっと違うかも」と感じた瞬間はありましたか？',
-    dig2: 'LWの求人ページや会社情報を読み進めて、「ここは自分と重なるかも」と感じた点を教えてください。',
+    dig1: 'その情報を読んで、最初に「あ、この会社他とちょっと違うかも」と感じた瞬間はありましたか？\nどんな言葉や情報が引っかかりましたか？',
+    dig2: 'LWの求人ページや会社情報を読み進めて、さらに詳しく調べようと思ったきっかけは何でしたか？',
     placeholder_dig1: '例：「クリエイティブディレクター」という肩書きじゃない職種名に引っかかりました。',
     placeholder_dig2: '例：代表のメッセージが他の会社と全然違うトーンで書かれていたので、もっと読みたくなりました。',
   },
@@ -734,7 +734,7 @@ const FLOW = [
   {
     id: 'q9', phaseNum: '02', phaseTitle: '今の視点から', optional: true,
     type: 'fixed',
-    text: '「もう少し早くこれを知っていたら、動き方が変わっていたな」と思うことはありますか？\n情報・人・場・タイミング、何でも。',
+    text: '入社してから「もう少し早くこれを知っていたら・得ていたら、動き方が変わっていたな」と思うことはありますか？\n情報・人・場・タイミング、何でも。',
     placeholder: '例：誰に何を聞いていいかわからなかった最初の2週間、こういう仕組みがあったら…',
   },
 ];
@@ -783,7 +783,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 function detectBranchFromText(text) {
   // 施設→SNS→コンテンツ→検索→人づての順で検出（具体的なものを優先）
-  const order = ['facility','sns','content','search','person'];
+  const order = ['person','facility','sns','content','search'];
   for (const key of order) {
     const b = BRANCHES[key];
     if (b.triggers.some(t => text.includes(t))) return key;
