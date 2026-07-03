@@ -516,11 +516,11 @@
 
   <!-- WELCOME -->
   <div class="screen active" id="screen-welcome">
-    <p class="welcome-kicker">FY25–26 入社体験の振り返り</p>
-    <h1 class="welcome-headline">ロフトワークとの出会いを辿ることで、<br>自分の物語が見えてくる。</h1>
+    <p class="welcome-kicker">FY26 入社体験の振り返り</p>
+    <h1 class="welcome-headline">よりよい選考UXをつくるために、<br>みなさんの体験を聞かせてください。</h1>
     <p class="welcome-lead">
       正解はありません。感じたままに、書いてください。<br>
-      （回答は採用プロセスの改善と、次に入ってくる仲間のオンボーディングをよくするためにも活用します。）
+      ロフトワークとの出会いを辿ることで、自分の物語が見えてくる。
     </p>
     <div class="meta-row" style="grid-template-columns:1fr 1fr 1fr;">
       <div class="meta-cell">
@@ -779,10 +779,34 @@ const FLOW = [
 
   // 05 ── 選考体験
   {
-    id: 'q4', phaseNum: '01', phaseTitle: '入社前の記憶', optional: true,
+    id: 'q4a', phaseNum: '01', phaseTitle: '入社前の記憶', optional: true,
     type: 'fixed',
-    text: 'LWの選考を受けてどんなことを感じましたか？具体的なエピソードと共に教えてください。\n（もしよければ他に選考を受けた会社も教えてください。のちほど他のメンバーがどういった会社を受けたかマッピングしてフィードバックします。お楽しみに！）',
-    placeholder: '例：A社は選考フローの説明がメールで丁寧に届いたのに対して、LWは…',
+    text: 'LWの選考を受けて、印象に残っていることを教えてください。',
+    placeholder: '例：面接の雰囲気が思っていたよりフラットで、驚きました。',
+  },
+
+  // 05b ── 並行して受けていた会社
+  {
+    id: 'q4b', phaseNum: '01', phaseTitle: '入社前の記憶', optional: true,
+    type: 'fixed',
+    text: '並行して選考を受けていた会社はありますか？あれば会社名を教えてください。',
+    placeholder: '例：A社、B社など（思い出せる範囲で）',
+  },
+
+  // 05c ── 面接で記憶に残っている質問
+  {
+    id: 'q4c', phaseNum: '01', phaseTitle: '入社前の記憶', optional: true,
+    type: 'fixed',
+    text: '面接中、一番記憶に残っている質問や会話を教えてください。それはなぜ記憶に残っていますか？',
+    placeholder: '例：「あなたにとって仕事とは何ですか」という質問に、うまく答えられなかったけど、逆に考えさせられました。',
+  },
+
+  // 05d ── 選考ステップの間に考えていたこと
+  {
+    id: 'q4d', phaseNum: '01', phaseTitle: '入社前の記憶', optional: true,
+    type: 'fixed',
+    text: '選考の各ステップの間、何を考えていましたか？',
+    placeholder: '例：次の面接までの間、LWのことをもっと調べようと思って、社員のインタビューをいくつか読み返していました。',
   },
 
   // 06 ── 内定を受けたとき
@@ -791,22 +815,6 @@ const FLOW = [
     type: 'fixed',
     text: '内定の連絡を受けたとき、最初に頭に浮かんだのは何でしたか？\nその日、誰かに話しましたか？何と言いましたか？',
     placeholder: '例：「決めよう」と思って家族に連絡しました。半面「どんな仕事になるんだろう」という不安もありました。',
-  },
-
-  // 07 ── 入社前後のイメージの変化＋腑に落ちた瞬間（統合）
-  {
-    id: 'q6', phaseNum: '02', phaseTitle: '今の視点から', optional: false,
-    type: 'fixed',
-    text: '入社してみて、LWのイメージは変わりましたか？\n「あ、これがLWか」と腑に落ちた瞬間でも、「思っていたのと違う」と感じた瞬間でも——入社前と今で一番変わったことを教えてください。',
-    placeholder: '例：もっとおしゃれなデザイン会社だと思っていたけど、実際はもっと泥くさくて面白かった。',
-  },
-
-  // 08 ── もっと早く知りたかったこと
-  {
-    id: 'q9', phaseNum: '02', phaseTitle: '今の視点から', optional: true,
-    type: 'fixed',
-    text: '入社してから「もう少し早くこれを知っていたら・得ていたら、動き方が変わっていたな」と思うことはありますか？\n情報・人・場・タイミング、何でも。',
-    placeholder: '例：誰に何を聞いていいかわからなかった最初の2週間、こういう仕組みがあったら…',
   },
 ];
 
@@ -1151,22 +1159,23 @@ function showRecord() {
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbzOeYJq2CAD64YGN3yOufzx32kKLHCcjCyvQzXSkyvYCIWnEEHnxdg9M_amLddtlwdn/exec';
 
 const Q_LABELS = {
-  q0:        '【Q0】職種',
-  q1a:       '【Q1-a】最初にLWを知った状況',
-  q1a_dig1:  '【Q1-a 深掘り①】体験・感情',
-  q1a_dig2:  '【Q1-a 深掘り②】認知後の行動',
-  q3:        '【Q3】応募までの時間',
-  q4:        '【Q4】選考体験',
-  q5:        '【Q5】内定を受けたとき',
-  q6:        '【Q6】入社前後で変わったこと',
-  q9:        '【Q9】もっと早く知りたかったこと',
+  q0:    '【Q0】職種',
+  q1a:   '【Q1-a】最初にLWを知った状況',
+  q1a_dig1: '【Q1-a 深掘り①】体験・感情',
+  q1a_dig2: '【Q1-a 深掘り②】認知後の行動',
+  q3:    '【Q3】応募までの時間',
+  q4a:   '【Q4-a】選考の印象',
+  q4b:   '【Q4-b】並行して受けた会社',
+  q4c:   '【Q4-c】記憶に残っている面接の質問・会話',
+  q4d:   '【Q4-d】選考ステップの間に考えていたこと',
+  q5:    '【Q5】内定を受けたとき',
 };
 
 async function sendToGAS() {
   const statusEl = document.getElementById('sendStatus');
 
   // スプレッドシートに1行で書き込むための列順リスト
-  const COLUMNS = ['q0','q1a','q1a_dig1','q1a_dig2','q3','q4','q5','q6','q9'];
+  const COLUMNS = ['q0','q1a','q1a_dig1','q1a_dig2','q3','q4a','q4b','q4c','q4d','q5'];
   const row = COLUMNS.map(id => answers[id] || '');
 
   const payload = {
